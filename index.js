@@ -36,6 +36,10 @@ app.post("/submit", async (req, res) => {
   }
 });
 
+app.get("/", (req,res)=>{
+  res.json("Wokring fine")
+})
+
 
 // ✅ No need for app.options("*", …) in Express v5
 // If you still want it:
