@@ -40,6 +40,17 @@ app.get("/", (req,res)=>{
   res.json("Wokring fine")
 })
 
+app.get("/api/enquiries", async (req, res) => {
+  try {
+    const response = await fetch(GOOGLE_SCRIPT_URL);
+    const data = await response.json();
+    res.json(data); // send back to frontend
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch enquiries" });
+  }
+});
+
 
 // ✅ No need for app.options("*", …) in Express v5
 // If you still want it:
