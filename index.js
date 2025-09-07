@@ -10,7 +10,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 const GOOGLE_SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbwVytk1hUEvItJUQJvcsJQn4UBnYdBCaGech7JeNikpTtPs8DgP6hspuBMxdHpwbVdajA/exec"
+"https://script.google.com/macros/s/AKfycbwxB2Zq_tsnQ9vvTfC48e1msz3RoqwYo06K62CTsk1CjMuJZXV5DIO948z-fTos0o4qBw/exec"
 app.post("/submit", async (req, res) => {
   try {
     const response = await fetch(GOOGLE_SCRIPT_URL, {
@@ -43,13 +43,27 @@ app.get("/", (req,res)=>{
 app.get("/api/enquiries", async (req, res) => {
   try {
     const response = await fetch(GOOGLE_SCRIPT_URL);
-    const data = await response.json();
-    res.json(data); // send back to frontend
+    const text = await response.text();
+
+    console.log("Google Script Raw:", text.slice(0, 200)); // 👀 debug first 200 chars
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (err) {
+      return res.status(500).json({
+        success: false,
+        error: "Invalid JSON from Google Script",
+        raw: text
+      });
+    }
+
+    res.json(data);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch enquiries" });
+    res.status(500).json({ success: false, error: err.message });
   }
 });
+
 
 
 // ✅ No need for app.options("*", …) in Express v5
