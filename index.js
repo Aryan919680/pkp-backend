@@ -10,21 +10,26 @@ app.use(cors());
 app.use(bodyParser.json());
 
 const GOOGLE_SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbwxB2Zq_tsnQ9vvTfC48e1msz3RoqwYo06K62CTsk1CjMuJZXV5DIO948z-fTos0o4qBw/exec"
+"https://script.google.com/macros/s/AKfycbxPG38p6QaIo5oCKxXxCoIxkTAXTQMny-5L9eUyvckJ814SV3Y-IA2teiGYebC3tXs82A/exec";
 app.post("/submit", async (req, res) => {
   try {
+    // Ensure sheetName is passed
+    if (!req.body.sheetName) {
+      return res.status(400).json({ error: "sheetName is required" });
+    }
+    console.log(req.body.sheetName)
     const response = await fetch(GOOGLE_SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(req.body),
     });
 
-    const text = await response.text(); // 👈 first get raw text
+    const text = await response.text();
     let data;
 
     try {
-      data = JSON.parse(text); // Try parse JSON
-    } catch (err) {
+      data = JSON.parse(text);
+    } catch {
       console.error("Google Script returned non-JSON:", text);
       return res.status(500).json({ error: "Invalid response from Google Script" });
     }
@@ -36,25 +41,25 @@ app.post("/submit", async (req, res) => {
   }
 });
 
-app.get("/", (req,res)=>{
-  res.json("Wokring fine")
-})
-
+// ✅ GET request (read from specific sheet)
 app.get("/api/enquiries", async (req, res) => {
   try {
-    const response = await fetch(GOOGLE_SCRIPT_URL);
-    const text = await response.text();
+    const sheetName = req.query.sheetName; // e.g. /api/enquiries?sheetName=Sheet2
+    if (!sheetName) {
+      return res.status(400).json({ error: "sheetName is required" });
+    }
 
-    console.log("Google Script Raw:", text.slice(0, 200)); // 👀 debug first 200 chars
+    const response = await fetch(`${GOOGLE_SCRIPT_URL}?sheetName=${encodeURIComponent(sheetName)}`);
+    const text = await response.text();
 
     let data;
     try {
       data = JSON.parse(text);
-    } catch (err) {
+    } catch {
       return res.status(500).json({
         success: false,
         error: "Invalid JSON from Google Script",
-        raw: text
+        raw: text,
       });
     }
 
@@ -64,7 +69,9 @@ app.get("/api/enquiries", async (req, res) => {
   }
 });
 
-
+app.get("/", (req, res) => {
+  res.json("✅ Working fine");
+});
 
 // ✅ No need for app.options("*", …) in Express v5
 // If you still want it:
