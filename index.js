@@ -10,7 +10,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 const GOOGLE_SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbxPG38p6QaIo5oCKxXxCoIxkTAXTQMny-5L9eUyvckJ814SV3Y-IA2teiGYebC3tXs82A/exec";
+"https://script.google.com/macros/s/AKfycbzoWEQpDwAK50HvuQMiENmLLE9cqXy86AVOcAj01pwHKuQyKvGy9UMj00P6IIDa3q52/exec";
 app.post("/submit", async (req, res) => {
   try {
     // Ensure sheetName is passed
